@@ -1,4 +1,4 @@
-function addToArrayForm(num, k){
+export function addToArrayForm(num, k){
   var kArr = []
   while (k) {
     kArr.unshift(k % 10);

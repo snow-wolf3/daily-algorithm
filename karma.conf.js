@@ -1,5 +1,6 @@
 // Karma configuration
 // Generated on Mon Mar 28 2022 16:59:05 GMT+0800 (中国标准时间)
+const webpackConfig =  require('./webpack.test.config')
 
 module.exports = function(config) {
   config.set({
@@ -10,24 +11,44 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://www.npmjs.com/search?q=keywords:karma-adapter
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'chai'],
 
 
     // list of files / patterns to load in the browser
     files: [
+      'test/**/*.js'
     ],
 
 
     // list of files / patterns to exclude
     exclude: [
     ],
-
+    webpack: webpackConfig,
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://www.npmjs.com/search?q=keywords:karma-preprocessor
     preprocessors: {
+      'src/**/*.js': ['babel'],
+      'test/**/*.js': ['babel'],
     },
-
+    // babelPreprocessor: {
+    //   options: {
+    //     presets: ['@babel/preset-env'],
+    //     sourceMap: 'inline'
+    //   },
+    //   filename: function (file) {
+    //     return file.originalPath.replace(/\.js$/, '.js');
+    //   },
+    //   sourceFileName: function (file) {
+    //     return file.originalPath;
+    //   }
+    // },
+    plugins: [
+      'karma-babel-preprocessor',
+      'karma-mocha',
+      'karma-chai',
+      'karma-chrome-launcher'
+    ],
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
@@ -54,7 +75,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://www.npmjs.com/search?q=keywords:karma-launcher
-    browsers: [],
+    browsers: ['Chrome'],
 
 
     // Continuous Integration mode
