@@ -2,9 +2,8 @@
  * @param {string} s
  * @return {string}
  */
-
+// 递归法
 var decodeString = function(s) {
-
   const o = {
     '[': 1,
     ']': -1,
@@ -46,4 +45,40 @@ var decodeString = function(s) {
   console.log(copy(s, 0));
   return copy(s, 0)
 };
-decodeString('ab3[c2[d]]x2[a]yz')
+
+// 栈堆法
+var decodeString2 = (s) => {
+  let stack = []
+  for (const char of s) {
+    if (char !== ']') { // ] 前的字符都入栈
+
+      stack.push(char)
+      // console.log(stack);
+      continue
+    }
+    let cur = stack.pop() // 弹出一个来检测
+    let str = '' // 组装字符串
+    // 接下来肯定是遇到字母，直到遇到 [
+    while (cur !== '[') {
+      str = cur + str // cur字符加在左边
+      cur = stack.pop() // 再拉出一个
+    }
+    // 此时cur为 [，接下来要遇到数字
+    let num = ''
+    cur = stack.pop() // 用下一个将 [ 覆盖
+    while (!isNaN(cur)) {
+      num = cur + num // 数字字符加在左边
+      cur = stack.pop() // 再拉出一个
+    }
+    // 现在要么是字母，要么是 [
+    console.log(cur);
+    stack.push(cur)
+    for (let j = 0; j < num; j++) {
+      stack.push(str)
+    }
+  }
+  console.log(stack.join(''), `stack.join('')`);
+  return stack.join('')
+}
+
+decodeString2('x2[3[a]r4[ff]]hhh')
