@@ -1,5 +1,5 @@
 // 根据README.md的3. 实战案例的步骤中去做
-// 这里做第六步: 实现then方法的链式调用
+// 这里做第七步: 实现空then方法的链式调用
 
 
 
@@ -74,9 +74,12 @@ class MyPromise {
     if (this.state === this.PENDING) {
       // 23. 这里需要链式调用, 我们再次new一个实例返回去
       return new MyPromise((resolve, reject) => {
+        // 26. 处理空then的链式调用, 同时将val传递下去
+        const onFullFillFun = onFullFilled || ((val) => val);
+
         this.resolvedCallbacks.push(() => {
           //24. 这里push的是一个方法, 因为我们需要获取当前then的值, 然后通过resolve传递给下一个then的回调中
-          const x = onFullFilled(this.value);
+          const x = onFullFillFun(this.value);
           resolve(x)
         })
       })
@@ -88,9 +91,7 @@ class MyPromise {
 
 
 const fn = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve('step1')
-  }, 1000)
+  resolve('step1')
 })
 const fn1 = new MyPromise((resolve, reject) => {
   // setTimeout(() => {
@@ -102,13 +103,18 @@ const fn1 = new MyPromise((resolve, reject) => {
   // 19. 第五部分: 防止resolve多次
   // resolve('step3')
   // resolve('step3.1')
-  resolve('4.0')
+  // resolve('4.0')
 
-}).then((r) => {
+  // 25. 第七部分: 支持空then的链式调用
+  resolve('step 5')
+})
+fn1.then((r) => {
   console.log('获取到了数据 ',r);
-  return '4.1'
-}).then((e) => {
-  console.log(e);
+  return '5.1'
+}).then().then((e) => {
+  console.log('第二层传递了', e);
+}).then((res) => {
+  console.log(res);
 })
 
 

@@ -26,3 +26,4 @@ new Promise -> 触发constructor(fn) -> 执行fn分两步 -> Promise实例 ---->
 9. 实现一个promise, 处理 then 中的循环 promise 对象
 10. 实现一个promise, 支持静态方法Promise.all
 11. 实现一个promise, 支持 reject 和 catch
+11. 实现一个promise, 支持处理完成态或失败态的then

@@ -1,19 +1,46 @@
 // 根据README.md的3. 实战案例的步骤中去做
-// 这里做第六步: 实现then方法的链式调用
-
+// 这里做第九步: 实现then方法的传递promise对象
+// 定义静态状态
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECT = 'REJECT';
+function promiseResolutionProcedure(promise2, x, resolve, reject) {
+  // 31. 这里将Function一起处理是不规范的, 我们要单独处理promise
+  if (x instanceof MyPromise) {
+    // 32. 只要进来这里了, 就跟处理then一样, 也要处理空对象, 链式调用, thenable等等
+    // 33. 当pending状态时, 就按照then流程金秀贤
+    if (x.state === PENDING) {
+      x.then(y => {
+        // 30. 这个方法主要是处理这里的y是否还是thenable
+        promiseResolutionProcedure(promise2, y, resolve, reject)
+      }, reject)
+    } else {
+      // 34. 如果是FULFILLED或者是REJECT状态就直接resolve或者reject解饿可
+      x.state === REJECT && resolve(x.value)
+      x.state === FULFILLED && reject(x.value)
+    }
+  }
+  // 29. 递归处理thenable对象
+  if ((typeof x === 'object' || typeof x === 'function') && x !== null && typeof x.then === 'function') {
+    // 同时提高容错, then也必须是Function
+    x.then(y => {
+      // 30. 这个方法主要是处理这里的y是否还是thenable
+      promiseResolutionProcedure(promise2, y, resolve, reject)
+    }, reject)
+  } else {
+    resolve(x)
+  }
+}
 
 
 class MyPromise {
 
-  // 定义静态状态
-  static PENDING = 'PENDING';
-  static FULFILLED = 'FULFILLED';
-  static REJECT = 'REJECT';
+  
   constructor(fn) {
     // promise 的三种状态
-    this.PENDING = MyPromise.PENDING;
-    this.FULFILLED = MyPromise.FULFILLED;
-    this.REJECT = MyPromise.REJECT;
+    this.PENDING = PENDING;
+    this.FULFILLED = FULFILLED;
+    this.REJECT = REJECT;
     // 11. 第二部分: 存在一个state存放状态, 根据(规范)[https://www.ituring.com.cn/article/66566], Promise有三种状态
     // 12. 首先我们知道, state一开始是pending状态
     this.state = this.PENDING;
@@ -73,13 +100,26 @@ class MyPromise {
     // 22. 第六部分: 在then方法中返回一个promise方法, 因为我们这边可以链式调用then, 所以每次都要返回一个new MyPromise
     if (this.state === this.PENDING) {
       // 23. 这里需要链式调用, 我们再次new一个实例返回去
-      return new MyPromise((resolve, reject) => {
+      const promise2 = new MyPromise((resolve, reject) => {
+        // 26. 处理空then的链式调用, 同时将val传递下去
+        const onFullFillFun = onFullFilled || ((val) => val);
+
         this.resolvedCallbacks.push(() => {
           //24. 这里push的是一个方法, 因为我们需要获取当前then的值, 然后通过resolve传递给下一个then的回调中
-          const x = onFullFilled(this.value);
-          resolve(x)
+          const x = onFullFillFun(this.value);
+          // 28. 根据Promise规范, 需要判断then返回的是不是一个thenable对象, 因为如果返回一个包含then函数的对象, 则需要进行链式调用一下, 提到外面做静态方法
+          // if ((typeof x === 'object' || typeof x === 'function') && x !== null && typeof x.then === 'function') {
+          //   // 同时提高容错, then也必须是Function
+          //   x.then(y => 
+          //     resolve(y)
+          //   )
+          // } else {
+          //   resolve(x)
+          // }
+          promiseResolutionProcedure(promise2, x, resolve, reject)
         })
       })
+      return promise2
     }
   }
 
@@ -88,9 +128,7 @@ class MyPromise {
 
 
 const fn = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve('step1')
-  }, 1000)
+  resolve('step1')
 })
 const fn1 = new MyPromise((resolve, reject) => {
   // setTimeout(() => {
@@ -102,13 +140,38 @@ const fn1 = new MyPromise((resolve, reject) => {
   // 19. 第五部分: 防止resolve多次
   // resolve('step3')
   // resolve('step3.1')
-  resolve('4.0')
+  // resolve('4.0')
 
-}).then((r) => {
-  console.log('获取到了数据 ',r);
-  return '4.1'
+  // 25. 第七部分: 支持空then的链式调用
+  // resolve('step 5')
+  
+  // 27. 第八部分: then支持thenable对象, 意思就是返回一个then方法
+  // resolve('step 6')
+  resolve('step 7')
+
+})
+fn1.then((r) => {
+  console.log('获取到数据', r);
+
+  // return {
+  //   then(resolve, reject) {
+  //     resolve({
+  //       then: ((r, j) => {
+  //         r({
+  //           then: ((r, j) => {
+  //             r('我是内部的多层thenable')
+  //           })
+  //         })
+  //       })
+  //     })
+  //   }
+  // }
+  // 第九部分: 返回promise
+  return new MyPromise((resolve, rej) => {
+    resolve('7.1')
+  })
 }).then((e) => {
-  console.log(e);
+  console.log('第二层传递了', e);
 })
 
 
