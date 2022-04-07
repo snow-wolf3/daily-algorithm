@@ -27,3 +27,10 @@ new Promise -> 触发constructor(fn) -> 执行fn分两步 -> Promise实例 ---->
 10. 实现一个promise, 支持静态方法Promise.all
 11. 实现一个promise, 支持 reject 和 catch
 11. 实现一个promise, 支持处理完成态或失败态的then
+
+Promise的资料网址
+https://www.kancloud.cn/kancloud/promises-book/44237: JavaScript Promise迷你书（中文版）
+
+https://promisesaplus.com/ promise A+规范原文
+https://www.ituring.com.cn/article/66566  promise A+规范译文
+
